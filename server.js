@@ -1428,7 +1428,7 @@ app.post('/returnStock', jsonParser, function(req, res) {
 
 
 
-var port = process.env.port || 8000;
+var port = process.env.PORT || 8000;
 
 server.listen(port);
 console.log("Server is up on port["+port+"]! Magic waiting to happen!!");
