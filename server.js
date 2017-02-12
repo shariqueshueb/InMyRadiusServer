@@ -1,7 +1,7 @@
 var express = require('express');
 var app = express();
 var moment = require('moment');
-
+var server = require('http').Server(app);
 var mongodb = require('mongodb');
 var MongoClient = require('mongodb').MongoClient;
 var db;
@@ -1430,5 +1430,5 @@ app.post('/returnStock', jsonParser, function(req, res) {
 
 var port = process.env.port || 8080;
 
-app.listen(port);
+server.listen(port);
 console.log("Server is up on port["+port+"]! Magic waiting to happen!!");
