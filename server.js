@@ -205,7 +205,7 @@ app.post('/distinctUsersLastMonth', jsonParser, function(req, res) {
         { $match: { retailerId: elements.retailerId } },
         { $group: { _id: "$userId", count: { $sum: 1 } } },
         { $group: { _id: null, count: { $sum: 1 } } }
-    , function(err,doc) {
+    , function(err,doc) { 
         console.dir(doc);
         console.log(doc[0].count);
         res.send(doc[0].count.toString());
@@ -631,6 +631,109 @@ app.post('/userStats', jsonParser, function(req, res) {
 
 
 
+    console.log("Transaction inserted");
+    res.send("Success");
+
+});
+
+app.post('/addUserTransaction', jsonParser, function (req, res) {
+
+    console.log("starting route");
+    var obj = JSON.stringify(req.body);
+    var elements = req.body;
+    console.dir(req.body);
+    var timeStamp = Math.floor(Date.now() / 1000);
+    var loyaltyPoints;
+    var tempTimeStamp;
+    var d = new Date(timeStamp * 1000);
+
+    var currDay = ('0' + d.getDate()).slice(-2);
+
+    console.log("the timeStamp day is : " + currDay);
+    // var tempTimeStamp= convertTimestamp(timeStamp);
+    
+    //first to check if entry exists for the same day or not
+
+
+    //the structure of the JSON is subject to change:
+    //userId
+    //userMinAge
+    //userGender
+    //retailerId
+    //advertisementId
+    //advertisementCategory
+    //advertisementRetailer
+    //productManufacturer
+    //productName
+    //productDiscount
+    //productPrice
+    //timestamp
+    db.collection('userTransactions').insert({
+        "userId": elements.userId,
+        "userMinAge": elements.userMinAge,
+        "userGender": elements.userGender,
+        "retailerId": elements.retailerId,
+        "advertisementId": elements.advertisementId,
+        "advertisementCategory": elements.advertisementCategory,
+        "advertisementRetailer": elements.advertisementRetailer,
+        "productManufacturer": elements.productManufacturer,
+        "productName": elements.productName,
+        "productDiscount": elements.productDiscount,
+        "productPrice": elements.productPrice,
+        "timeStamp": timeStamp
+    }, function (err) {
+        console.log("added in user Transactions");
+
+    });
+
+    db.collection('loyaltyPoints').find({
+        "userId": elements.userId,
+        "retailerId": elements.retailerId
+
+    }).count(function (err, count) {
+
+        console.log(count);
+
+        if (count == 1) //implies entry exists
+        {
+
+
+            db.collection('loyaltyPoints').update({
+                "userId": elements.userId,
+                "retailerId": elements.retailerId
+            }, {
+                    $set: { "timeStamp": timeStamp },
+                    $inc: { "loyaltyPoints": 5 }
+
+                });
+            console.log("updated loyalty points");
+        } else { //implies we must add new entry
+
+
+            //userId
+            //retailerId
+            //advertisementRetailer
+            //timeStamp
+            //loyaltyPoints
+
+            db.collection('loyaltyPoints').insert({
+                "userId": elements.userId,
+                "retailerId": elements.retailerId,
+                "advertisementRetailer": elements.advertisementRetailer,
+                "timeStamp": timeStamp,
+                "loyaltyPoints": 5
+            }, function (err) {
+
+                console.log("added new loyalty points");
+            });
+
+        }
+
+
+    });
+
+    
+    
     console.log("Transaction inserted");
     res.send("Success");
 
